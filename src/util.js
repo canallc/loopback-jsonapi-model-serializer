@@ -66,9 +66,16 @@ module.exports = (options = {baseUrl: '/'}) => {
     for (let name of Object.keys(relations)) {
       const relation = relations[name]
       const relatedModel = relatedModelFromRelation(relation)
-      if (relation.polymorphic) continue
-      const pk = primaryKeyForModel(relatedModel)
-      const type = pluralForModel(relatedModel)
+      let pk, type
+      if (relation.polymorphic) {
+        // use the conventions to get the ID and plural
+        pk = 'id'
+        type = data[relation.polymorphic.discriminator] + 's'
+        type = type.charAt(0).toLowerCase() + type.slice(1);
+      } else {
+        pk = primaryKeyForModel(relatedModel)
+        type = pluralForModel(relatedModel)
+      }
       if (Array.isArray(data[name])) {
         relationships[name] = {data: []}
         for (let relatedData of data[name]) {
@@ -126,4 +133,3 @@ module.exports = (options = {baseUrl: '/'}) => {
     relatedModelFromRelation
   }
 }
-
