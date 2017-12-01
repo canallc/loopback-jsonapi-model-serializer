@@ -65,7 +65,16 @@ module.exports = (options = {baseUrl: '/'}) => {
     const relations = model.relations
     for (let name of Object.keys(relations)) {
       const relation = relations[name]
-      if (relation.polymorphic) continue
+      if (relation.polymorphic) {
+        let item = {}
+        let relatedData = data[name]
+        item.id = relatedData.id
+        item.type = data[relation.polymorphic.discriminator] + 's'
+        item.type = item.type.charAt(0).toLowerCase() + item.type.slice(1);
+        item.attributes = relatedData
+        incl.set(item.type + '-' + item.id, item)
+        continue
+      }
       const model = lib().relatedModelFromRelation(relation)
       let relatedData = data[name] || []
       if (!model) return incl
